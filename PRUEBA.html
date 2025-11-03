@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contiescenario - Gestión de Estacionamiento</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .app-header {
+            background: linear-gradient(to right, #1a2a6c, #2a3a8c);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 5px solid #fdbb2d;
+        }
+        
+        .app-header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        
+        .app-header p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .screen {
+            padding: 20px;
+            display: none;
+        }
+        
+        .active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            border-color: #1a2a6c;
+            outline: none;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(to right, #1a2a6c, #2a3a8c);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(to right, #6c757d, #5a6268);
+        }
+        
+        .link {
+            text-align: center;
+            margin-top: 15px;
+            color: #1a2a6c;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .link:hover {
+            text-decoration: underline;
+        }
+        
+        .ticket {
+            background-color: #f8f9fa;
+            border: 2px dashed #1a2a6c;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .ticket h3 {
+            color: #1a2a6c;
+            margin-bottom: 10px;
+        }
+        
+        .ticket-info {
+            text-align: left;
+            margin: 10px 0;
+        }
+        
+        .ticket-info p {
+            margin: 5px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .ticket-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #b21f1f;
+            margin: 10px 0;
+        }
+        
+        .vehicle-list {
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .vehicle-item {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 5px solid #1a2a6c;
+        }
+        
+        .vehicle-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .vehicle-plate {
+            font-weight: bold;
+            color: #1a2a6c;
+        }
+        
+        .vehicle-time {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .logout-btn {
+            background: linear-gradient(to right, #b21f1f, #c82333);
+            margin-top: 20px;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background-color: #28a745;
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transform: translateX(150%);
+            transition: transform 0.3s;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.error {
+            background-color: #dc3545;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                border-radius: 10px;
+            }
+            
+            .app-header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .screen {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="app-header">
+            <h1>Contiescenario</h1>
+            <p>Sistema de Gestión de Estacionamiento</p>
+        </div>
+        
+        <!-- Pantalla de Inicio de Sesión -->
+        <div id="login-screen" class="screen active">
+            <h2>Iniciar Sesión</h2>
+            <div class="form-group">
+                <label for="login-username">Usuario</label>
+                <input type="text" id="login-username" placeholder="Ingresa tu usuario">
+            </div>
+            <div class="form-group">
+                <label for="login-password">Contraseña</label>
+                <input type="password" id="login-password" placeholder="Ingresa tu contraseña">
+            </div>
+            <button id="login-btn" class="btn">Iniciar Sesión</button>
+            <div class="link" id="go-to-register">¿No tienes cuenta? Regístrate aquí</div>
+        </div>
+        
+        <!-- Pantalla de Registro -->
+        <div id="register-screen" class="screen">
+            <h2>Registrar Nuevo Usuario</h2>
+            <div class="form-group">
+                <label for="register-username">Usuario</label>
+                <input type="text" id="register-username" placeholder="Crea un nombre de usuario">
+            </div>
+            <div class="form-group">
+                <label for="register-password">Contraseña</label>
+                <input type="password" id="register-password" placeholder="Crea una contraseña">
+            </div>
+            <div class="form-group">
+                <label for="register-fullname">Nombre Completo</label>
+                <input type="text" id="register-fullname" placeholder="Ingresa tu nombre completo">
+            </div>
+            <button id="register-btn" class="btn">Registrarse</button>
+            <div class="link" id="go-to-login">¿Ya tienes cuenta? Inicia sesión aquí</div>
+        </div>
+        
+        <!-- Pantalla Principal -->
+        <div id="main-screen" class="screen">
+            <h2>Gestión de Estacionamiento</h2>
+            <div class="form-group">
+                <label for="vehicle-plate">Placa del Auto</label>
+                <input type="text" id="vehicle-plate" placeholder="Ej: ABC123">
+            </div>
+            <div class="form-group">
+                <label for="owner-dni">DNI del Dueño</label>
+                <input type="text" id="owner-dni" placeholder="Ej: 12345678">
+            </div>
+            <div class="form-group">
+                <label for="owner-name">Nombre del Dueño</label>
+                <input type="text" id="owner-name" placeholder="Ej: Juan Pérez">
+            </div>
+            <button id="register-vehicle-btn" class="btn">Registrar y Generar Ticket</button>
+            
+            <div id="ticket-display" class="ticket" style="display: none;">
+                <h3>Ticket de Estacionamiento</h3>
+                <div class="ticket-number" id="ticket-number">TICK001</div>
+                <div class="ticket-info">
+                    <p><span>Placa:</span> <span id="ticket-plate"></span></p>
+                    <p><span>DNI:</span> <span id="ticket-dni"></span></p>
+                    <p><span>Dueño:</span> <span id="ticket-owner"></span></p>
+                    <p><span>Fecha:</span> <span id="ticket-date"></span></p>
+                    <p><span>Hora:</span> <span id="ticket-time"></span></p>
+                </div>
+            </div>
+            
+            <h3 style="margin-top: 20px;">Vehículos Estacionados</h3>
+            <div id="vehicle-list" class="vehicle-list">
+                <!-- Los vehículos se mostrarán aquí -->
+            </div>
+            
+            <button id="logout-btn" class="btn logout-btn">Cerrar Sesión</button>
+        </div>
+    </div>
+    
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // Datos de la aplicación
+        const users = [
+            { username: "admin", password: "admin123", fullname: "Administrador Principal" },
+            { username: "operador1", password: "operador123", fullname: "Operador Uno" },
+            { username: "operador2", password: "operador456", fullname: "Operador Dos" }
+        ];
+        
+        let currentUser = null;
+        let vehicles = [];
+        let ticketCounter = 1;
+        
+        // Elementos del DOM
+        const loginScreen = document.getElementById('login-screen');
+        const registerScreen = document.getElementById('register-screen');
+        const mainScreen = document.getElementById('main-screen');
+        const notification = document.getElementById('notification');
+        
+        // Funciones de navegación
+        function showScreen(screen) {
+            loginScreen.classList.remove('active');
+            registerScreen.classList.remove('active');
+            mainScreen.classList.remove('active');
+            screen.classList.add('active');
+        }
+        
+        // Mostrar notificación
+        function showNotification(message, isError = false) {
+            notification.textContent = message;
+            notification.classList.remove('error');
+            
+            if (isError) {
+                notification.classList.add('error');
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Generar número de ticket
+        function generateTicketNumber() {
+            const ticketNumber = `TICK${ticketCounter.toString().padStart(3, '0')}`;
+            ticketCounter++;
+            return ticketNumber;
+        }
+        
+        // Formatear fecha y hora
+        function formatDateTime(date) {
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            
+            return {
+                date: `${day}/${month}/${year}`,
+                time: `${hours}:${minutes}`
+            };
+        }
+        
+        // Calcular costo de estacionamiento
+        function calculateCost(startTime, endTime) {
+            const diffMs = endTime - startTime;
+            const diffMins = Math.floor(diffMs / (1000 * 60));
+            const diffHours = Math.floor(diffMins / 60);
+            
+            const costPerHour = 2; // 2 soles por hora
+            const costPerMinute = 0.03; // 0.03 soles por minuto
+            
+            let cost = 0;
+            
+            if (diffHours > 0) {
+                cost += diffHours * costPerHour;
+            }
+            
+            const remainingMinutes = diffMins % 60;
+            if (remainingMinutes > 0) {
+                cost += remainingMinutes * costPerMinute;
+            }
+            
+            return {
+                hours: diffHours,
+                minutes: remainingMinutes,
+                cost: Math.round(cost * 100) / 100
+            };
+        }
+        
+        // Renderizar lista de vehículos
+        function renderVehicleList() {
+            const vehicleList = document.getElementById('vehicle-list');
+            vehicleList.innerHTML = '';
+            
+            if (vehicles.length === 0) {
+                vehicleList.innerHTML = '<p style="text-align: center; color: #6c757d;">No hay vehículos estacionados</p>';
+                return;
+            }
+            
+            vehicles.forEach(vehicle => {
+                const vehicleItem = document.createElement('div');
+                vehicleItem.className = 'vehicle-item';
+                
+                const vehicleInfo = document.createElement('div');
+                vehicleInfo.className = 'vehicle-info';
+                
+                const plateSpan = document.createElement('span');
+                plateSpan.className = 'vehicle-plate';
+                plateSpan.textContent = vehicle.plate;
+                
+                const timeSpan = document.createElement('span');
+                timeSpan.className = 'vehicle-time';
+                timeSpan.textContent = `${vehicle.date} ${vehicle.time}`;
+                
+                vehicleInfo.appendChild(plateSpan);
+                vehicleInfo.appendChild(timeSpan);
+                
+                const ownerInfo = document.createElement('div');
+                ownerInfo.textContent = `${vehicle.ownerName} (DNI: ${vehicle.ownerDni})`;
+                
+                const ticketInfo = document.createElement('div');
+                ticketInfo.className = 'vehicle-time';
+                ticketInfo.textContent = `Ticket: ${vehicle.ticket}`;
+                
+                vehicleItem.appendChild(vehicleInfo);
+                vehicleItem.appendChild(ownerInfo);
+                vehicleItem.appendChild(ticketInfo);
+                
+                // Si el vehículo ya fue retirado, mostrar información del pago
+                if (vehicle.endTime) {
+                    const paymentInfo = document.createElement('div');
+                    paymentInfo.className = 'vehicle-time';
+                    paymentInfo.textContent = `Retirado: ${vehicle.endDate} ${vehicle.endTime} - Costo: S/. ${vehicle.cost}`;
+                    vehicleItem.appendChild(paymentInfo);
+                } else {
+                    // Botón para registrar salida
+                    const exitBtn = document.createElement('button');
+                    exitBtn.className = 'btn';
+                    exitBtn.textContent = 'Registrar Salida';
+                    exitBtn.style.marginTop = '10px';
+                    exitBtn.style.padding = '8px';
+                    exitBtn.style.fontSize = '0.9rem';
+                    
+                    exitBtn.addEventListener('click', () => {
+                        const endTime = new Date();
+                        const endDateTime = formatDateTime(endTime);
+                        const costInfo = calculateCost(vehicle.startTime, endTime);
+                        
+                        vehicle.endTime = endTime;
+                        vehicle.endDate = endDateTime.date;
+                        vehicle.endTimeStr = endDateTime.time;
+                        vehicle.cost = costInfo.cost;
+                        vehicle.duration = `${costInfo.horas}h ${costInfo.minutos}m`;
+                        
+                        renderVehicleList();
+                        showNotification(`Vehículo ${vehicle.plate} retirado. Costo: S/. ${vehicle.cost}`);
+                    });
+                    
+                    vehicleItem.appendChild(exitBtn);
+                }
+                
+                vehicleList.appendChild(vehicleItem);
+            });
+        }
+        
+        // Event Listeners
+        document.getElementById('go-to-register').addEventListener('click', () => {
+            showScreen(registerScreen);
+        });
+        
+        document.getElementById('go-to-login').addEventListener('click', () => {
+            showScreen(loginScreen);
+        });
+        
+        document.getElementById('login-btn').addEventListener('click', () => {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            
+            if (!username || !password) {
+                showNotification('Por favor, completa todos los campos', true);
+                return;
+            }
+            
+            const user = users.find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                currentUser = user;
+                showScreen(mainScreen);
+                showNotification(`Bienvenido, ${user.fullname}`);
+            } else {
+                showNotification('Usuario o contraseña incorrectos', true);
+            }
+        });
+        
+        document.getElementById('register-btn').addEventListener('click', () => {
+            const username = document.getElementById('register-username').value;
+            const password = document.getElementById('register-password').value;
+            const fullname = document.getElementById('register-fullname').value;
+            
+            if (!username || !password || !fullname) {
+                showNotification('Por favor, completa todos los campos', true);
+                return;
+            }
+            
+            if (users.some(u => u.username === username)) {
+                showNotification('El usuario ya existe', true);
+                return;
+            }
+            
+            users.push({ username, password, fullname });
+            showNotification('Usuario registrado exitosamente');
+            showScreen(loginScreen);
+            
+            // Limpiar campos
+            document.getElementById('register-username').value = '';
+            document.getElementById('register-password').value = '';
+            document.getElementById('register-fullname').value = '';
+        });
+        
+        document.getElementById('register-vehicle-btn').addEventListener('click', () => {
+            const plate = document.getElementById('vehicle-plate').value;
+            const dni = document.getElementById('owner-dni').value;
+            const ownerName = document.getElementById('owner-name').value;
+            
+            if (!plate || !dni || !ownerName) {
+                showNotification('Por favor, completa todos los campos', true);
+                return;
+            }
+            
+            // Verificar si el vehículo ya está estacionado
+            if (vehicles.some(v => v.plate === plate && !v.endTime)) {
+                showNotification('Este vehículo ya está estacionado', true);
+                return;
+            }
+            
+            const currentTime = new Date();
+            const dateTime = formatDateTime(currentTime);
+            const ticketNumber = generateTicketNumber();
+            
+            const vehicle = {
+                plate,
+                ownerDni: dni,
+                ownerName,
+                ticket: ticketNumber,
+                date: dateTime.date,
+                time: dateTime.time,
+                startTime: currentTime
+            };
+            
+            vehicles.push(vehicle);
+            
+            // Mostrar ticket
+            document.getElementById('ticket-number').textContent = ticketNumber;
+            document.getElementById('ticket-plate').textContent = plate;
+            document.getElementById('ticket-dni').textContent = dni;
+            document.getElementById('ticket-owner').textContent = ownerName;
+            document.getElementById('ticket-date').textContent = dateTime.date;
+            document.getElementById('ticket-time').textContent = dateTime.time;
+            
+            document.getElementById('ticket-display').style.display = 'block';
+            
+            // Limpiar campos
+            document.getElementById('vehicle-plate').value = '';
+            document.getElementById('owner-dni').value = '';
+            document.getElementById('owner-name').value = '';
+            
+            renderVehicleList();
+            showNotification(`Vehículo ${plate} registrado exitosamente`);
+        });
+        
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            currentUser = null;
+            showScreen(loginScreen);
+            showNotification('Sesión cerrada exitosamente');
+        });
+        
+        // Inicializar la aplicación
+        renderVehicleList();
+    </script>
+</body>
+</html>
